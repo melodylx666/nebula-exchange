@@ -270,7 +270,7 @@ object Exchange {
     * @param config  The com.vesoft.exchange.common.config.
     * @return
     */
-  private[this] def createDataSource(
+  private[this] def createDataSourceOld(
       session: SparkSession,
       config: DataSourceConfigEntry,
       fields: List[String]
@@ -364,7 +364,7 @@ object Exchange {
   }
 
 
-  private[this] def createDataSourceNew(
+  private[this] def createDataSource(
      session: SparkSession,
      config: DataSourceConfigEntry,
      fields: List[String]

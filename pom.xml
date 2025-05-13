@@ -45,6 +45,7 @@
         <module>nebula-exchange_spark_2.4</module>
         <module>nebula-exchange_spark_2.2</module>
         <module>nebula-exchange_spark_3.0</module>
+        <module>exchange-plugin</module>
     </modules>
 
     <distributionManagement>
@@ -199,7 +200,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>3.2.0</version>
+                        <version>3.1.1</version>
                         <executions>
                             <execution>
                                 <id>attach-javadocs</id>
@@ -262,5 +263,6 @@
                 <module>nebula-exchange_spark_3.0</module>
             </modules>
         </profile>
+
     </profiles>
 </project>

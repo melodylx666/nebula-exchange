@@ -4,9 +4,9 @@ import com.vesoft.exchange.common.config.DataSourceConfigEntry
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
 /**
-* 数据源插件接口
+ * 数据源插件接口
  * TODO plugin 类拆分到单独模块中，否则每个插件的custom都需要引入全量依赖。
-*/
+ */
 
 trait DataSourcePlugin {
   /**

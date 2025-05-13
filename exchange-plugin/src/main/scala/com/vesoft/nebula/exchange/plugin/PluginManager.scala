@@ -1,8 +1,8 @@
 package com.vesoft.nebula.exchange.plugin
 
 /**
-* 插件管理类
-*/
+ * 插件管理类
+ */
 import java.util.ServiceLoader
 import scala.collection.mutable
 import org.apache.log4j.Logger
