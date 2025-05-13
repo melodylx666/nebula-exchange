@@ -14,6 +14,7 @@ import com.vesoft.exchange.common.config.{ClickHouseConfigEntry, Configs, DataSo
 import com.vesoft.nebula.exchange.reader.{CSVReader, ClickhouseReader, HBaseReader, HiveReader, JSONReader, JanusGraphReader, JdbcReader, KafkaReader, MaxcomputeReader, MySQLReader, Neo4JReader, ORCReader, OracleReader, ParquetReader, PostgreSQLReader, PulsarReader}
 import com.vesoft.exchange.common.processor.ReloadProcessor
 import com.vesoft.exchange.common.utils.SparkValidate
+import com.vesoft.nebula.exchange.plugin.PluginManager
 import com.vesoft.nebula.exchange.processor.{EdgeProcessor, VerticesProcessor}
 import org.apache.log4j.Logger
 import org.apache.spark.sql.functions.{col, concat_ws}
@@ -361,6 +362,32 @@ object Exchange {
       }
     }
   }
+
+
+  private[this] def createDataSourceNew(
+     session: SparkSession,
+     config: DataSourceConfigEntry,
+     fields: List[String]
+  ): Option[DataFrame] = {
+    //加载对应数据源插件
+    PluginManager.init()
+
+    //创建对应类型数据源并加载为DataFrame返回
+    val sourceCategory = config.category.toString.toLowerCase
+    PluginManager.get(sourceCategory) match{
+      case Some(plugin) => {
+        LOG.info(s">>>>> loading data source success")
+        plugin.createReader(session, config)
+      }
+      case None => {
+        LOG.error(s">>>>> Data source ${config.category} not supported")
+        None
+      }
+    }
+
+  }
+
+
 
   /**
     * Repartition the data frame using the specified partition number.
