@@ -278,6 +278,7 @@ class VerticesProcessor(spark: SparkSession,
   /**
     * encode vertex for tagless
     */
+  //TODO 类定义名称有问题，属于typo
   def encodeVertexForTageless(
       row: Row,
       partitionNum: Int,

@@ -23,8 +23,5 @@ object PluginManager {
     plugins.get(category.toLowerCase)
   }
 
-  def getAllCategories():Seq[String] = {
-    plugins.keys.toSeq
-  }
 
 }
