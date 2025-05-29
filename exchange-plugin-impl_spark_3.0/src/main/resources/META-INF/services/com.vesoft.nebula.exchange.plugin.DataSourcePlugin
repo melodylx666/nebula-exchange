@@ -1,0 +1,10 @@
+com.vesoft.nebula.exchange.plugin.fileBase.CsvDataSourcePlugin
+com.vesoft.nebula.exchange.plugin.fileBase.JSONDataSourcePlugin
+com.vesoft.nebula.exchange.plugin.fileBase.OrcDataSourcePlugin
+com.vesoft.nebula.exchange.plugin.fileBase.ParquetDataSourcePlugin
+com.vesoft.nebula.exchange.plugin.serverBase.CkDataSourcePlugin
+com.vesoft.nebula.exchange.plugin.serverBase.HBaseDataSourcePlugin
+com.vesoft.nebula.exchange.plugin.serverBase.HiveDataSourcePlugin
+com.vesoft.nebula.exchange.plugin.serverBase.MySQLDataSourcePlugin
+com.vesoft.nebula.exchange.plugin.streamingBase.KafkaDataSourcePlugin
+com.vesoft.nebula.exchange.plugin.streamingBase.PulsarDataSourcePlugin

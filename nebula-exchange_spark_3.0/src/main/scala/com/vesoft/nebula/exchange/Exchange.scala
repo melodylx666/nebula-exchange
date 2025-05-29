@@ -113,7 +113,9 @@ object Exchange {
     var schemaConfigs: ListBuffer[SchemaConfigEntry] = new ListBuffer[SchemaConfigEntry]
     schemaConfigs.append(configs.tagsConfig: _*)
     schemaConfigs.append(configs.edgesConfig: _*)
-
+    //加载对应数据源插件，不同的job group共享插件jar包
+    //这里一个边/点对应一个spark job。每个Job都提交到集群去执行
+    PluginManager.init()
     schemaConfigs.par.foreach {
       case tagConfig: TagConfigEntry =>
         LOG.info(s">>>>> Processing Tag ${tagConfig.name}")
@@ -369,22 +371,21 @@ object Exchange {
      config: DataSourceConfigEntry,
      fields: List[String]
   ): Option[DataFrame] = {
-    //加载对应数据源插件
-    PluginManager.init()
 
     //创建对应类型数据源并加载为DataFrame返回
     val sourceCategory = config.category.toString.toLowerCase
     PluginManager.get(sourceCategory) match{
       case Some(plugin) => {
         LOG.info(s">>>>> loading data source success")
-        plugin.createReader(session, config)
+        //TODO 原有日志只能是现有日志的子集，不能让现有日志比原来还少
+        //TODO 参数已经穿透过去了
+        plugin.createReader(session, config,fields)
       }
       case None => {
         LOG.error(s">>>>> Data source ${config.category} not supported")
         None
       }
     }
-
   }
 
 

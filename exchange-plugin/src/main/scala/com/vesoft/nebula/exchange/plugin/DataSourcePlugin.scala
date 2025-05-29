@@ -19,8 +19,9 @@ trait DataSourcePlugin {
    * 创建数据源插件的reader，其将读取并返回DataFrame
    * @param session：spark session
    * @param config：数据源配置
+   * @param fields：字段列表
    * @return
    */
-  def createReader(session:SparkSession,config:DataSourceConfigEntry):Option[DataFrame]
+  def createReader(session:SparkSession,config:DataSourceConfigEntry,fields:List[String]):Option[DataFrame]
 
 }
