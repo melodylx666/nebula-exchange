@@ -1122,6 +1122,11 @@ object Configs {
         .action((x, c) => c.copy(param = x))
         .text("file param path")
 
+      //add -s/--switch to switch mode
+      //TODO 这里现在设置为没有参数，之后看情况再添加参数
+       opt[Unit]('s', "switch")
+         .action((_,c) => c.copy(switch = true))
+         .text("switch mode")
     }
     parser.parse(args, Argument())
   }

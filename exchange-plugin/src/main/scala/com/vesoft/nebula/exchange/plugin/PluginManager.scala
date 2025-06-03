@@ -16,6 +16,7 @@ object PluginManager {
     //此方法在master节点主线程执行，所以是后续的所有线程共用一份插件
     val loader: ServiceLoader[DataSourcePlugin] = ServiceLoader.load(classOf[DataSourcePlugin])
     //此处loader是iterable，并且在遍历的时候，插件jar包就会被加载
+    //TODO 这里是粗粒度插件，所以就算一次本次只使用CSV，也会加载全部jar包
     loader.forEach(plugin => {
       plugins.put(plugin.category.toLowerCase, plugin)
       LOG.info(s">>>>> Loading and initializing data source plugin: ${plugin.category} successfully!")

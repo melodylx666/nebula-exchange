@@ -113,9 +113,13 @@ object Exchange {
     var schemaConfigs: ListBuffer[SchemaConfigEntry] = new ListBuffer[SchemaConfigEntry]
     schemaConfigs.append(configs.tagsConfig: _*)
     schemaConfigs.append(configs.edgesConfig: _*)
-    //加载对应数据源插件，不同的job group共享插件jar包
+
+    //查看是否是切换到自定义数据源模式
+    if(c.switch){
+      LOG.info(">>>>> switch to custom data source mode")
+      PluginManager.init()
+    }
     //这里一个边/点对应一个spark job。每个Job都提交到集群去执行
-    PluginManager.init()
     schemaConfigs.par.foreach {
       case tagConfig: TagConfigEntry =>
         LOG.info(s">>>>> Processing Tag ${tagConfig.name}")
@@ -129,7 +133,11 @@ object Exchange {
         LOG.info(s">>>>> nebula keys: ${nebulaKeys.mkString(", ")}")
 
         val fields = tagConfig.vertexField :: tagConfig.fields
-        val data   = createDataSource(spark, tagConfig.dataSourceConfigEntry, fields)
+//        val data  = {
+//          if(c.switch) createDataSourceNew(spark, tagConfig.dataSourceConfigEntry, fields)
+//          else createDataSourceOld(spark, tagConfig.dataSourceConfigEntry, fields)
+//        }
+        val data = createDataSourceOld(spark, tagConfig.dataSourceConfigEntry, fields)
         if (data.isDefined && c.dry && !data.get.isStreaming) {
           data.get.show(truncate = false)
         }
@@ -196,7 +204,11 @@ object Exchange {
         } else {
           edgeConfig.sourceField :: edgeConfig.targetField :: edgeConfig.fields
         }
-        val data = createDataSource(spark, edgeConfig.dataSourceConfigEntry, fields)
+//        val data = {
+//          if(c.switch) createDataSourceNew(spark, edgeConfig.dataSourceConfigEntry, fields)
+//          else createDataSourceOld(spark, edgeConfig.dataSourceConfigEntry, fields)
+//        }
+        val data = createDataSourceOld(spark, edgeConfig.dataSourceConfigEntry, fields)
         if (data.isDefined && c.dry && !data.get.isStreaming) {
           data.get.show(truncate = false)
         }
@@ -359,14 +371,23 @@ object Exchange {
         Some(reader.read())
       }
       case _ => {
-        LOG.error(s">>>>> Data source ${config.category} not supported")
-        None
+        //TODO 在这里添加降级策略，默认此时是用户使用了插件数据源
+//        LOG.error(s">>>>> Data source ${config.category} not supported")
+//        None
+        LOG.info((s">>>>> Failing down to custom data source mode"))
+        createDataSourceNew(session, config, fields)
       }
     }
   }
 
-
-  private[this] def createDataSource(
+  /**
+   * Create Custom data source for different data type.
+   * @param session The Spark Session.
+   * @param config The config
+   * @param fields The fileds to use, here is only used by kafka
+   * @return DataFrame from custom data source
+   */
+  private[this] def createDataSourceNew(
      session: SparkSession,
      config: DataSourceConfigEntry,
      fields: List[String]
