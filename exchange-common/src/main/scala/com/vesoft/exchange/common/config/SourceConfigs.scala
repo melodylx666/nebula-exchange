@@ -34,6 +34,9 @@ object SourceCategory extends Enumeration {
   val SOCKET = Value("SOCKET")
   val KAFKA  = Value("KAFKA")
   val PULSAR = Value("PULSAR")
+
+  //add custom plugin
+  val CUSTOM = Value("CUSTOM")
 }
 
 class SourceCategory

@@ -11,10 +11,10 @@ import java.io.File
 import com.vesoft.exchange.Argument
 import com.vesoft.exchange.common.{CheckPointHandler, ErrorHandler}
 import com.vesoft.exchange.common.config.{ClickHouseConfigEntry, Configs, DataSourceConfigEntry, EdgeConfigEntry, FileBaseSourceConfigEntry, FilterConfigEntry, HBaseSourceConfigEntry, HiveSourceConfigEntry, JanusGraphSourceConfigEntry, JdbcConfigEntry, KafkaSourceConfigEntry, MaxComputeConfigEntry, MySQLSourceConfigEntry, Neo4JSourceConfigEntry, OracleConfigEntry, PostgreSQLSourceConfigEntry, PulsarSourceConfigEntry, SchemaConfigEntry, SinkCategory, SourceCategory, TagConfigEntry, UdfConfigEntry}
+import com.vesoft.exchange.common.plugin.PluginManager
 import com.vesoft.nebula.exchange.reader.{CSVReader, ClickhouseReader, HBaseReader, HiveReader, JSONReader, JanusGraphReader, JdbcReader, KafkaReader, MaxcomputeReader, MySQLReader, Neo4JReader, ORCReader, OracleReader, ParquetReader, PostgreSQLReader, PulsarReader}
 import com.vesoft.exchange.common.processor.ReloadProcessor
 import com.vesoft.exchange.common.utils.SparkValidate
-import com.vesoft.nebula.exchange.plugin.PluginManager
 import com.vesoft.nebula.exchange.processor.{EdgeProcessor, VerticesProcessor}
 import org.apache.log4j.Logger
 import org.apache.spark.sql.functions.{col, concat_ws}
@@ -371,36 +371,34 @@ object Exchange {
         Some(reader.read())
       }
       case _ => {
-        //TODO 在这里添加降级策略，默认此时是用户使用了插件数据源
-//        LOG.error(s">>>>> Data source ${config.category} not supported")
-//        None
         LOG.info((s">>>>> Failing down to custom data source mode"))
-        createDataSourceNew(session, config, fields)
+        //create plugin and read data
+        PluginManager.get() match{
+          case Some(plugin) => {
+            LOG.info(s">>>>> loading data source success")
+            plugin.readData(session, config,fields)
+          }
+          case None => {
+            LOG.error(s">>>>> Data source ${config.category} not supported")
+            None
+          }
+        }
       }
     }
   }
 
-  /**
-   * Create Custom data source for different data type.
-   * @param session The Spark Session.
-   * @param config The config
-   * @param fields The fileds to use, here is only used by kafka
-   * @return DataFrame from custom data source
-   */
+
   private[this] def createDataSourceNew(
      session: SparkSession,
      config: DataSourceConfigEntry,
      fields: List[String]
   ): Option[DataFrame] = {
 
-    //创建对应类型数据源并加载为DataFrame返回
-    val sourceCategory = config.category.toString.toLowerCase
-    PluginManager.get(sourceCategory) match{
+
+    PluginManager.get() match{
       case Some(plugin) => {
         LOG.info(s">>>>> loading data source success")
-        //TODO 原有日志只能是现有日志的子集，不能让现有日志比原来还少
-        //TODO 参数已经穿透过去了
-        plugin.createReader(session, config,fields)
+        plugin.readData(session, config,fields)
       }
       case None => {
         LOG.error(s">>>>> Data source ${config.category} not supported")

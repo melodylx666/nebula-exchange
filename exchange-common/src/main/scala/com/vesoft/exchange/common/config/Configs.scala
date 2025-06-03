@@ -10,6 +10,7 @@ import java.nio.file.Files
 import com.google.common.net.HostAndPort
 import com.typesafe.config.{Config, ConfigFactory}
 import com.vesoft.exchange.Argument
+import com.vesoft.exchange.common.plugin.PluginManager
 import com.vesoft.exchange.common.{KeyPolicy, PasswordEncryption}
 import com.vesoft.exchange.common.utils.NebulaUtils
 import com.vesoft.nebula.client.graph.data.HostAddress
@@ -689,7 +690,11 @@ object Configs {
       case "POSTGRESQL" => SourceCategory.POSTGRESQL
       case "ORACLE"     => SourceCategory.ORACLE
       case "JDBC"       => SourceCategory.JDBC
-      case _            => throw new IllegalArgumentException(s"${category} not support")
+      //case _            => throw new IllegalArgumentException(s"${category} not support")
+      case _ => {
+        //use plugin mode
+        SourceCategory.CUSTOM
+      }
     }
   }
 
@@ -961,8 +966,23 @@ object Configs {
           getStringOrNull(config, "sentence")
         )
       }
-      case _ =>
-        throw new IllegalArgumentException("Unsupported data source")
+//      case _ =>
+//        throw new IllegalArgumentException("Unsupported data source")
+      case _ => {
+        //此处进来的是SourceCategory.CUSTOM
+        //通过插件管理器解析自定义数据源的配置
+        //这里是首次降级的地方，所以进行插件init
+        PluginManager.init()
+        LOG.info(s">>>>>Init Custom data source plugin!")
+        val plugin = PluginManager.get()
+        plugin match {
+          case Some(plugin) =>
+            LOG.info(s"Custom data source plugin: ${plugin.categoryName}")
+            plugin.dataSourceConfigParser(category, config, nebulaConfig, variable, paths)
+          case None =>
+            throw new IllegalArgumentException("Unsupported data source")
+        }
+      }
     }
   }
 

@@ -1,7 +1,8 @@
 package com.vesoft.nebula.exchange.plugin.fileBase
 
-import com.vesoft.exchange.common.config.{DataSourceConfigEntry, FileBaseSourceConfigEntry}
-import com.vesoft.nebula.exchange.plugin.DataSourcePlugin
+import com.typesafe.config.Config
+import com.vesoft.exchange.common.config.{DataSourceConfigEntry, FileBaseSourceConfigEntry, SourceCategory}
+import com.vesoft.exchange.common.plugin.DataSourcePlugin
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
 /**
@@ -14,26 +15,35 @@ import org.apache.spark.sql.{DataFrame, SparkSession}
 */
 
 class CsvDataSourcePlugin extends DataSourcePlugin {
+  override def categoryName: String = "csv-custom"
 
-  /**
-   * 数据源插件类型,比如 mysql,CSV等
-   *
-   * @return 数据源插件类型字符串
-   */
-  override def category: String = "csv"
+  override def dataSourceConfigParser(category: SourceCategory.Value, config: Config, nebulaConfig: Config, variable: Boolean, paths: Map[String, String]): DataSourceConfigEntry = {
+    //copy from default mode data source for test
+    val separator =
+      if (config.hasPath("separator"))
+        config.getString("separator")
+      else ","
+    val header =
+      if (config.hasPath("header"))
+        config.getBoolean("header")
+      else
+        false
+    if (variable)
+      FileBaseSourceConfigEntry(SourceCategory.CUSTOM,
+        paths(config.getString("path")),
+        Some(separator),
+        Some(header))
+    else
+      FileBaseSourceConfigEntry(SourceCategory.CUSTOM,
+        config.getString("path"),
+        Some(separator),
+        Some(header))
+  }
 
-  /**
-   * 创建数据源插件的reader，其将读取并返回DataFrame
-   *
-   * @param session ：spark session
-   * @param config  ：数据源配置
-   * @return
-   */
-  override def createReader(session: SparkSession, config: DataSourceConfigEntry,fields:List[String]): Option[DataFrame] = {
-    val csvConfig: FileBaseSourceConfigEntry = config.asInstanceOf[FileBaseSourceConfigEntry]
-    val reader = new CSVReader(session, csvConfig)
-    //TODO remove the println and use logging framework
-    println("----------CSVDataSourcePlugin begin load Data-----------")
+  override def readData(session: SparkSession, config: DataSourceConfigEntry, fields: List[String]): Option[DataFrame] = {
+    val csvConfig = config.asInstanceOf[FileBaseSourceConfigEntry]
+    val reader =
+      new CSVReader(session, csvConfig)
     Some(reader.read())
   }
 }
