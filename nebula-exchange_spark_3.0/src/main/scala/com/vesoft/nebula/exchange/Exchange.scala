@@ -137,7 +137,7 @@ object Exchange {
 //          if(c.switch) createDataSourceNew(spark, tagConfig.dataSourceConfigEntry, fields)
 //          else createDataSourceOld(spark, tagConfig.dataSourceConfigEntry, fields)
 //        }
-        val data = createDataSourceOld(spark, tagConfig.dataSourceConfigEntry, fields)
+        val data = createDataSourceOld(spark, tagConfig.dataSourceConfigEntry, fields, tagConfig.name)
         if (data.isDefined && c.dry && !data.get.isStreaming) {
           data.get.show(truncate = false)
         }
@@ -208,7 +208,7 @@ object Exchange {
 //          if(c.switch) createDataSourceNew(spark, edgeConfig.dataSourceConfigEntry, fields)
 //          else createDataSourceOld(spark, edgeConfig.dataSourceConfigEntry, fields)
 //        }
-        val data = createDataSourceOld(spark, edgeConfig.dataSourceConfigEntry, fields)
+        val data = createDataSourceOld(spark, edgeConfig.dataSourceConfigEntry, fields, edgeConfig.name)
         if (data.isDefined && c.dry && !data.get.isStreaming) {
           data.get.show(truncate = false)
         }
@@ -287,7 +287,8 @@ object Exchange {
   private[this] def createDataSourceOld(
       session: SparkSession,
       config: DataSourceConfigEntry,
-      fields: List[String]
+      fields: List[String],
+      elemName:String
   ): Option[DataFrame] = {
     config.category match {
       case SourceCategory.PARQUET =>
@@ -373,9 +374,11 @@ object Exchange {
       case _ => {
         LOG.info((s">>>>> Failing down to custom data source mode"))
         //create plugin and read data
-        PluginManager.get() match{
+        val registeredPlugin = PluginManager.getPluginByElem(elemName)
+        registeredPlugin match{
           case Some(plugin) => {
-            LOG.info(s">>>>> loading data source success")
+            LOG.info(s">>>>> Plugin Matched to load data:${plugin.getClass.getName}")
+            LOG.info(s">>>>> loading data by plugin!")
             plugin.readData(session, config,fields)
           }
           case None => {

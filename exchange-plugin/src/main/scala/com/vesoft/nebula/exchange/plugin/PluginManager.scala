@@ -1,7 +1,7 @@
 package com.vesoft.nebula.exchange.plugin
 
 /**
- * 插件管理类
+ * TODO 此模块已经废弃！类在exchange-common中
  */
 import java.util.ServiceLoader
 import scala.collection.mutable

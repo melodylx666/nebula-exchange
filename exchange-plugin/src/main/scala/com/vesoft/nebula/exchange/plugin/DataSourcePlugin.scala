@@ -5,7 +5,7 @@ import org.apache.spark.sql.{DataFrame, SparkSession}
 
 /**
  * 数据源插件接口
- * TODO plugin 类拆分到单独模块中，否则每个插件的custom都需要引入全量依赖。
+ *  TODO 此模块已经废弃！类在exchange-common中
  */
 
 trait DataSourcePlugin {
