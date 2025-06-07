@@ -115,10 +115,10 @@ object Exchange {
     schemaConfigs.append(configs.edgesConfig: _*)
 
     //查看是否是切换到自定义数据源模式
-    if(c.switch){
-      LOG.info(">>>>> switch to custom data source mode")
-      PluginManager.init()
-    }
+//    if(c.switch){
+//      LOG.info(">>>>> switch to custom data source mode")
+//      PluginManager.init()
+//    }
     //这里一个边/点对应一个spark job。每个Job都提交到集群去执行
     schemaConfigs.par.foreach {
       case tagConfig: TagConfigEntry =>
@@ -371,7 +371,7 @@ object Exchange {
         val reader     = new JdbcReader(session, jdbcConfig)
         Some(reader.read())
       }
-      case _ => {
+      case SourceCategory.CUSTOM => {
         LOG.info((s">>>>> Failing down to custom data source mode"))
         //create plugin and read data
         val registeredPlugin = PluginManager.getPluginByElem(elemName)
@@ -386,6 +386,10 @@ object Exchange {
             None
           }
         }
+      }
+      case _ => {
+        LOG.error(s">>>>> Data source ${config.category} not supported")
+        None
       }
     }
   }

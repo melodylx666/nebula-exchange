@@ -10,7 +10,7 @@ import java.nio.file.Files
 import com.google.common.net.HostAndPort
 import com.typesafe.config.{Config, ConfigFactory}
 import com.vesoft.exchange.Argument
-import com.vesoft.exchange.common.plugin.PluginManager
+import com.vesoft.exchange.common.plugin.{DataSourcePlugin, PluginManager}
 import com.vesoft.exchange.common.{KeyPolicy, PasswordEncryption}
 import com.vesoft.exchange.common.utils.NebulaUtils
 import com.vesoft.nebula.client.graph.data.HostAddress
@@ -23,6 +23,8 @@ import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import scala.collection.JavaConverters._
 import scala.util.control.Breaks.break
+import scala.reflect.runtime.universe
+
 
 object Type extends Enumeration {
   type Type = Value
@@ -987,6 +989,14 @@ object Configs {
           case None =>
             throw new IllegalArgumentException("Unsupported data source")
         }
+//        val customPluginName = config.getString("type.source")
+//        Class.forName(customPluginName)
+//        //使用scala Mirror 加载object
+//        val mirror = universe.runtimeMirror(getClass.getClassLoader)
+//        val moduleSymbol = mirror.staticModule(customPluginName)
+//        val moduleInstance = mirror.reflectModule(moduleSymbol).instance
+//        val plugin = moduleInstance.asInstanceOf[DataSourcePlugin]
+//        plugin.dataSourceConfigParser(category, config, nebulaConfig, variable, paths)
       }
       case _ =>{
         throw new IllegalArgumentException("Unsupported data source")
