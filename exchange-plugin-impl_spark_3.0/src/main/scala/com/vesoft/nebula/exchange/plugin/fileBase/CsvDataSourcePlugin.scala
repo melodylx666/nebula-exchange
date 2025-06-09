@@ -2,7 +2,7 @@ package com.vesoft.nebula.exchange.plugin.fileBase
 
 import com.typesafe.config.Config
 import com.vesoft.exchange.common.config.{DataSourceConfigEntry, FileBaseSourceConfigEntry, SourceCategory}
-import com.vesoft.exchange.common.plugin.DataSourcePlugin
+import com.vesoft.exchange.common.plugin.{DataSourcePlugin, DataSourcePluginCompanion}
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
 /**
@@ -45,6 +45,13 @@ class CsvDataSourcePlugin extends DataSourcePlugin {
     val reader =
       new CSVReader(session, csvConfig)
     Some(reader.read())
+  }
+}
+
+object CsvDataSourcePlugin extends DataSourcePluginCompanion{
+
+  override def createPlugin(name: String): DataSourcePlugin = {
+    new CsvDataSourcePlugin()
   }
 }
 

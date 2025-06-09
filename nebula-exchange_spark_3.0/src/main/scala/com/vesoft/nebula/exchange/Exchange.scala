@@ -11,7 +11,7 @@ import java.io.File
 import com.vesoft.exchange.Argument
 import com.vesoft.exchange.common.{CheckPointHandler, ErrorHandler}
 import com.vesoft.exchange.common.config.{ClickHouseConfigEntry, Configs, DataSourceConfigEntry, EdgeConfigEntry, FileBaseSourceConfigEntry, FilterConfigEntry, HBaseSourceConfigEntry, HiveSourceConfigEntry, JanusGraphSourceConfigEntry, JdbcConfigEntry, KafkaSourceConfigEntry, MaxComputeConfigEntry, MySQLSourceConfigEntry, Neo4JSourceConfigEntry, OracleConfigEntry, PostgreSQLSourceConfigEntry, PulsarSourceConfigEntry, SchemaConfigEntry, SinkCategory, SourceCategory, TagConfigEntry, UdfConfigEntry}
-import com.vesoft.exchange.common.plugin.PluginManager
+import com.vesoft.exchange.common.plugin.{DataSourcePlugin, PluginManager}
 import com.vesoft.nebula.exchange.reader.{CSVReader, ClickhouseReader, HBaseReader, HiveReader, JSONReader, JanusGraphReader, JdbcReader, KafkaReader, MaxcomputeReader, MySQLReader, Neo4JReader, ORCReader, OracleReader, ParquetReader, PostgreSQLReader, PulsarReader}
 import com.vesoft.exchange.common.processor.ReloadProcessor
 import com.vesoft.exchange.common.utils.SparkValidate
@@ -120,6 +120,7 @@ object Exchange {
 //      PluginManager.init()
 //    }
     //这里一个边/点对应一个spark job。每个Job都提交到集群去执行
+    //TODO 需要在这里之前将map处理好，则后面的只是并发读取
     schemaConfigs.par.foreach {
       case tagConfig: TagConfigEntry =>
         LOG.info(s">>>>> Processing Tag ${tagConfig.name}")
@@ -374,18 +375,19 @@ object Exchange {
       case SourceCategory.CUSTOM => {
         LOG.info((s">>>>> Failing down to custom data source mode"))
         //create plugin and read data
-        val registeredPlugin = PluginManager.getPluginByElem(elemName)
-        registeredPlugin match{
-          case Some(plugin) => {
-            LOG.info(s">>>>> Plugin Matched to load data:${plugin.getClass.getName}")
-            LOG.info(s">>>>> loading data by plugin!")
-            plugin.readData(session, config,fields)
-          }
-          case None => {
-            LOG.error(s">>>>> Data source ${config.category} not supported")
-            None
-          }
-        }
+//        val registeredPlugin = PluginManager.getPluginByElem(elemName)
+//        registeredPlugin match{
+//          case Some(plugin) => {
+//            LOG.info(s">>>>> Plugin Matched to load data:${plugin.getClass.getName}")
+//            LOG.info(s">>>>> loading data by plugin!")
+//            plugin.readData(session, config,fields)
+//          }
+//          case None => {
+//            LOG.error(s">>>>> Data source ${config.category} not supported")
+//            None
+//          }
+//        }
+        DataSourcePlugin.ReadData(session, config, fields,elemName)
       }
       case _ => {
         LOG.error(s">>>>> Data source ${config.category} not supported")

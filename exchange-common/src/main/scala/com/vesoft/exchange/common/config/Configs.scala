@@ -974,21 +974,22 @@ object Configs {
         //此处进来的是SourceCategory.CUSTOM
         //通过插件管理器解析自定义数据源的配置
         //这里是首次降级的地方，所以进行插件init
-        PluginManager.init()
-        LOG.info(s">>>>>Init Custom data source plugin!")
-        val customPluginName = config.getString("type.source")
-        val plugin = PluginManager.get(customPluginName)
-        plugin match {
-          case Some(plugin) =>
-            //将插件实现类和元素绑定
-            val elemName = config.getString("name")
-            PluginManager.elemToPlugin(elemName, plugin)
-            LOG.info(s"Custom data source plugin: ${plugin.getClass.getName} match the elem:${config.getString("name")}")
-            //加载配置
-            plugin.dataSourceConfigParser(category, config, nebulaConfig, variable, paths)
-          case None =>
-            throw new IllegalArgumentException("Unsupported data source")
-        }
+        DataSourcePlugin.HandleConfig(category, config, nebulaConfig, variable, paths)
+//        PluginManager.init()
+//        LOG.info(s">>>>>Init Custom data source plugin!")
+//        val customPluginName = config.getString("type.source")
+//        val plugin = PluginManager.get(customPluginName)
+//        plugin match {
+//          case Some(plugin) =>
+//            //将插件实现类和元素绑定
+//            val elemName = config.getString("name")
+//            PluginManager.elemToPlugin(elemName, plugin)
+//            LOG.info(s"Custom data source plugin: ${plugin.getClass.getName} match the elem:${config.getString("name")}")
+//            //加载配置
+//            plugin.dataSourceConfigParser(category, config, nebulaConfig, variable, paths)
+//          case None =>
+//            throw new IllegalArgumentException("Unsupported data source")
+//        }
 //        val customPluginName = config.getString("type.source")
 //        Class.forName(customPluginName)
 //        //使用scala Mirror 加载object
