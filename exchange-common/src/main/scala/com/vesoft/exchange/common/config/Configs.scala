@@ -971,9 +971,9 @@ object Configs {
 //      case _ =>
 //        throw new IllegalArgumentException("Unsupported data source")
       case SourceCategory.CUSTOM => {
-        //此处进来的是SourceCategory.CUSTOM
-        //通过插件管理器解析自定义数据源的配置
-        //这里是首次降级的地方，所以进行插件init
+        //这里的配置解析分析两种情况：
+        //1.可以被解析为内置的ConfigEntity,比如CsvConfig等
+        //2.配置字段不确定，只能解析为CustomConfigEntity，参数全量透传
         DataSourcePlugin.HandleConfig(category, config, nebulaConfig, variable, paths)
 //        PluginManager.init()
 //        LOG.info(s">>>>>Init Custom data source plugin!")

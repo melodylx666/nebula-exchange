@@ -5,6 +5,7 @@
 
 package com.vesoft.exchange.common.config
 
+import com.typesafe.config.Config
 import com.vesoft.exchange.common.utils.NebulaUtils
 import org.apache.spark.sql.SparkSession
 
@@ -374,5 +375,18 @@ case class JdbcConfigEntry(override val category: SourceCategory.Value,
   require(table != null || sentence != null, "Either table or sentence must be config for JDBC.")
   override def toString: String = {
     s"Jdbc source {url:$url, driver:$driver, user:$user, passwd:$passwd, table:$table, sentence:$sentence}"
+  }
+}
+
+//新增自定义配置项
+case class CustomSourceConfigEntry(override val category: SourceCategory.Value,
+                             rawConfig:Config,
+                             nebulaConfig: Config,
+                             variable: Boolean,
+                             paths: Map[String, String])
+  extends DataSourceConfigEntry{
+  override def toString: String = {
+    //TODO 这里toString应该输出？
+    s"Custom source, just remaining original param"
   }
 }

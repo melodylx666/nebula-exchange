@@ -33,23 +33,24 @@ abstract class DataSourcePlugin {
 
 abstract class DataSourcePluginCompanion {
   private val LOG = Logger.getLogger(this.getClass)
-  private var pluginInstance:Option[DataSourcePlugin] = None
+  private var _pluginInstance:Option[DataSourcePlugin] = None
   /*-------------------实例管理部分-----------------------------*/
 
   def createPlugin(name: String):DataSourcePlugin
 
   final def initPlugin(name: String):Unit = {
-    if(pluginInstance.isEmpty){
-      pluginInstance = Some(createPlugin(name))
+    if(_pluginInstance.isEmpty){
+      _pluginInstance = Some(createPlugin(name))
     }
   }
 
-  def getPlugin(name:String):Option[DataSourcePlugin] = {
-    pluginInstance
+  final def getPlugin(name:String):Option[DataSourcePlugin] = {
+    _pluginInstance
   }
 
-  def clearPlugin(): Unit = {
-    pluginInstance = None
+  final def clearPlugin(): Unit = {
+    LOG.info(s">>>>> Clearing plugin instance")
+    _pluginInstance = None
   }
 
 }
@@ -63,6 +64,7 @@ object DataSourcePlugin{
   private val nameToCompanion = mutable.Map[String,DataSourcePluginCompanion]()
   private val elementToCompanion = mutable.Map[String,DataSourcePluginCompanion]()
 
+  //Companion反射
   private[this] def lookupCompanion(name: String):DataSourcePluginCompanion = {
     Class.forName(name)
     val mirror = ru.runtimeMirror(getClass.getClassLoader)
@@ -98,7 +100,7 @@ object DataSourcePlugin{
     }
   }
 
-  //读取数据
+  //读取数据，这里映射关系是并发读，线程安全
   def ReadData(session:SparkSession,config:DataSourceConfigEntry,fields:List[String],element:String):Option[DataFrame] = {
     elementToCompanion.get(element) match {
       case Some(companion) => {

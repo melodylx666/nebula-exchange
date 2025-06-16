@@ -1,7 +1,7 @@
 package com.vesoft.nebula.exchange.plugin.fileBase
 
 import com.typesafe.config.Config
-import com.vesoft.exchange.common.config.{DataSourceConfigEntry, FileBaseSourceConfigEntry, SourceCategory}
+import com.vesoft.exchange.common.config.{CustomSourceConfigEntry, DataSourceConfigEntry, FileBaseSourceConfigEntry, SourceCategory}
 import com.vesoft.exchange.common.plugin.{DataSourcePlugin, DataSourcePluginCompanion}
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
@@ -38,6 +38,7 @@ class CsvDataSourcePlugin extends DataSourcePlugin {
         config.getString("path"),
         Some(separator),
         Some(header))
+    //CustomSourceConfigEntry(SourceCategory.CUSTOM,config, nebulaConfig,variable, paths)
   }
 
   override def readData(session: SparkSession, config: DataSourceConfigEntry, fields: List[String]): Option[DataFrame] = {
