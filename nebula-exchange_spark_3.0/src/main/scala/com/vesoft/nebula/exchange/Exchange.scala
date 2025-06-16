@@ -11,7 +11,7 @@ import java.io.File
 import com.vesoft.exchange.Argument
 import com.vesoft.exchange.common.{CheckPointHandler, ErrorHandler}
 import com.vesoft.exchange.common.config.{ClickHouseConfigEntry, Configs, DataSourceConfigEntry, EdgeConfigEntry, FileBaseSourceConfigEntry, FilterConfigEntry, HBaseSourceConfigEntry, HiveSourceConfigEntry, JanusGraphSourceConfigEntry, JdbcConfigEntry, KafkaSourceConfigEntry, MaxComputeConfigEntry, MySQLSourceConfigEntry, Neo4JSourceConfigEntry, OracleConfigEntry, PostgreSQLSourceConfigEntry, PulsarSourceConfigEntry, SchemaConfigEntry, SinkCategory, SourceCategory, TagConfigEntry, UdfConfigEntry}
-import com.vesoft.exchange.common.plugin.{DataSourcePlugin, PluginManager}
+import com.vesoft.exchange.common.plugin.{DataSourcePlugin}
 import com.vesoft.nebula.exchange.reader.{CSVReader, ClickhouseReader, HBaseReader, HiveReader, JSONReader, JanusGraphReader, JdbcReader, KafkaReader, MaxcomputeReader, MySQLReader, Neo4JReader, ORCReader, OracleReader, ParquetReader, PostgreSQLReader, PulsarReader}
 import com.vesoft.exchange.common.processor.ReloadProcessor
 import com.vesoft.exchange.common.utils.SparkValidate
@@ -374,42 +374,9 @@ object Exchange {
       }
       case SourceCategory.CUSTOM => {
         LOG.info((s">>>>> Failing down to custom data source mode"))
-        //create plugin and read data
-//        val registeredPlugin = PluginManager.getPluginByElem(elemName)
-//        registeredPlugin match{
-//          case Some(plugin) => {
-//            LOG.info(s">>>>> Plugin Matched to load data:${plugin.getClass.getName}")
-//            LOG.info(s">>>>> loading data by plugin!")
-//            plugin.readData(session, config,fields)
-//          }
-//          case None => {
-//            LOG.error(s">>>>> Data source ${config.category} not supported")
-//            None
-//          }
-//        }
         DataSourcePlugin.ReadData(session, config, fields,elemName)
       }
       case _ => {
-        LOG.error(s">>>>> Data source ${config.category} not supported")
-        None
-      }
-    }
-  }
-
-
-  private[this] def createDataSourceNew(
-     session: SparkSession,
-     config: DataSourceConfigEntry,
-     fields: List[String]
-  ): Option[DataFrame] = {
-
-
-    PluginManager.get() match{
-      case Some(plugin) => {
-        LOG.info(s">>>>> loading data source success")
-        plugin.readData(session, config,fields)
-      }
-      case None => {
         LOG.error(s">>>>> Data source ${config.category} not supported")
         None
       }

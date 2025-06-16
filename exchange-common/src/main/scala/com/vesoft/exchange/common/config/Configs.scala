@@ -10,7 +10,7 @@ import java.nio.file.Files
 import com.google.common.net.HostAndPort
 import com.typesafe.config.{Config, ConfigFactory}
 import com.vesoft.exchange.Argument
-import com.vesoft.exchange.common.plugin.{DataSourcePlugin, PluginManager}
+import com.vesoft.exchange.common.plugin.{DataSourcePlugin}
 import com.vesoft.exchange.common.{KeyPolicy, PasswordEncryption}
 import com.vesoft.exchange.common.utils.NebulaUtils
 import com.vesoft.nebula.client.graph.data.HostAddress
