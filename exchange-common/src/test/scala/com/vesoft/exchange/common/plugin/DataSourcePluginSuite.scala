@@ -18,7 +18,7 @@ class DataSourcePluginSuite {
   private[this] def lookupCompanion(name: String):DataSourcePluginCompanion = {
     //use the same cl for the class and companion must share the same cl
     val cl = Thread.currentThread().getContextClassLoader
-    Class.forName(name,false,cl)
+    // Class.forName(name,false,cl)
     val mirror = ru.runtimeMirror(cl)
     val companionSymbol = mirror.staticModule(name)
     val companion = mirror.reflectModule(companionSymbol).instance.asInstanceOf[DataSourcePluginCompanion]
@@ -42,16 +42,20 @@ class DataSourcePluginSuite {
       .getOrCreate()
 
     //force load for the default case
-    try{
+    try {
       val name = "com.vesoft.nebula.exchange.plugin.fileBase.CsvDataSourcePlugin"
       val pluginCompanion = lookupCompanion(name)
       pluginCompanion.initPlugin(name)
       val plugin = pluginCompanion.getPlugin(name).get
       assert(plugin.categoryType == SourceCategory.CUSTOM)
       assert(plugin.categoryName == "csv-custom")
+      assert(plugin.getClass.getName == name)
       LOG.info(s">>>>> ${plugin.categoryName} load success!")
-    }catch {
-      case e: Exception => LOG.error(s">>>>>${e}")
+    } catch {
+      case e: Exception => {
+        LOG.error(s">>>>>${e}")
+        throw e
+      }
     } finally {
       session.stop()
     }

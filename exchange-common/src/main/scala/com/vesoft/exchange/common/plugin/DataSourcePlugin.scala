@@ -4,7 +4,6 @@ import com.typesafe.config.Config
 import com.vesoft.exchange.common.config.{DataSourceConfigEntry, SourceCategory}
 
 import org.apache.log4j.Logger
-import org.apache.spark.sql.catalyst.expressions.aggregate.First
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
 import scala.collection.mutable
@@ -48,7 +47,7 @@ abstract class DataSourcePluginCompanion {
     _pluginInstance
   }
 
-  final def clearPlugin(): Unit = {
+  def clearPlugin(): Unit = {
     LOG.info(s">>>>> Clearing plugin instance")
     _pluginInstance = None
   }
@@ -66,8 +65,11 @@ object DataSourcePlugin{
 
   //Companion反射
   private[this] def lookupCompanion(name: String):DataSourcePluginCompanion = {
-    Class.forName(name)
-    val mirror = ru.runtimeMirror(getClass.getClassLoader)
+    //use the same cl for the class and companion,here use default app classLoader in JDK8
+    val cl = getClass.getClassLoader
+    //TODO 这里其实可以删除
+    Class.forName(name,false,cl)
+    val mirror = ru.runtimeMirror(cl)
     val companionSymbol = mirror.staticModule(name)
     val companion = mirror.reflectModule(companionSymbol).instance.asInstanceOf[DataSourcePluginCompanion]
     companion
