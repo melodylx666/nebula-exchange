@@ -27,7 +27,7 @@ class DataSourcePluginSuite {
 
   @Before
   def setUp(): Unit = {
-    //junit can't find the spark --jars,so we must load the jar
+    //junit can't find the spark --jars,so we must use URLClassLoader to load the jar
     val url = new File(pluginJarPath).toURI.toURL
     val classLoader = new URLClassLoader(Array(url), getClass.getClassLoader)
     Thread.currentThread().setContextClassLoader(classLoader)
@@ -44,6 +44,7 @@ class DataSourcePluginSuite {
     //force load for the default case
     try {
       val name = "com.vesoft.nebula.exchange.plugin.fileBase.CsvDataSourcePlugin"
+      //val name = "com.vesoft.nebula.exchange.plugin.fileBase.ParquetDataSourcePlugin"
       val pluginCompanion = lookupCompanion(name)
       pluginCompanion.initPlugin(name)
       val plugin = pluginCompanion.getPlugin(name).get

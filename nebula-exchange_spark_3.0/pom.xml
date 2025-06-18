@@ -374,11 +374,6 @@
             <artifactId>exchange-common</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>com.vesoft</groupId>
-            <artifactId>exchange-plugin</artifactId>
-            <version>${project.version}</version>
-        </dependency>
     </dependencies>
     <repositories>
         <repository>
