@@ -380,13 +380,11 @@ case class JdbcConfigEntry(override val category: SourceCategory.Value,
 
 //新增自定义配置项
 case class CustomSourceConfigEntry(override val category: SourceCategory.Value,
-                             rawConfig:Config,
-                             nebulaConfig: Config,
-                             variable: Boolean,
-                             paths: Map[String, String])
+                                   readerClazz:String,
+                                   rawConfig:Config,
+                                   nebulaConfig: Config)
   extends DataSourceConfigEntry{
   override def toString: String = {
-    //TODO 这里toString应该输出？
-    s"Custom source, just remaining original param"
+    s"custom reader:${readerClazz}"
   }
 }

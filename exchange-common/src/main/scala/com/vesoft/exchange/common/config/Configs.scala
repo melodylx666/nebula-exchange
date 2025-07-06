@@ -10,9 +10,9 @@ import java.nio.file.Files
 import com.google.common.net.HostAndPort
 import com.typesafe.config.{Config, ConfigFactory}
 import com.vesoft.exchange.Argument
-import com.vesoft.exchange.common.plugin.{DataSourcePlugin}
+import com.vesoft.exchange.common.plugin.{DataSourceConfigResolver, DataSourcePlugin}
 import com.vesoft.exchange.common.{KeyPolicy, PasswordEncryption}
-import com.vesoft.exchange.common.utils.NebulaUtils
+import com.vesoft.exchange.common.utils.{CompanionUtils, NebulaUtils}
 import com.vesoft.nebula.client.graph.data.HostAddress
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{FSDataInputStream, FileSystem, Path}
@@ -970,11 +970,9 @@ object Configs {
       }
 //      case _ =>
 //        throw new IllegalArgumentException("Unsupported data source")
-      case SourceCategory.CUSTOM => {
-        //这里的配置解析分析两种情况：
-        //1.可以被解析为内置的ConfigEntity,比如CsvConfig等
-        //2.配置字段不确定，只能解析为CustomConfigEntity，参数全量透传
-        DataSourcePlugin.HandleConfig(category, config, nebulaConfig, variable, paths)
+    //  case SourceCategory.CUSTOM => {
+        //DataSourcePlugin.HandleConfig(category, config, nebulaConfig, variable, paths)
+
 //        PluginManager.init()
 //        LOG.info(s">>>>>Init Custom data source plugin!")
 //        val customPluginName = config.getString("type.source")
@@ -998,6 +996,13 @@ object Configs {
 //        val moduleInstance = mirror.reflectModule(moduleSymbol).instance
 //        val plugin = moduleInstance.asInstanceOf[DataSourcePlugin]
 //        plugin.dataSourceConfigParser(category, config, nebulaConfig, variable, paths)
+      //}
+      case SourceCategory.CUSTOM => {
+        //config parse may use the CustomSourceConfigEntry to pass raw  config when the config option is not supported
+        val configResolverClazz = config.getString("configResolver")
+        CompanionUtils
+          .lookupCompanion[DataSourceConfigResolver](configResolverClazz)
+          .getDataSourceConfigEntry(category, config, nebulaConfig)
       }
       case _ =>{
         throw new IllegalArgumentException("Unsupported data source")
