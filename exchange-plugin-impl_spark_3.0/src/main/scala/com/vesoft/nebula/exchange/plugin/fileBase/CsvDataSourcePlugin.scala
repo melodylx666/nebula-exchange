@@ -42,10 +42,11 @@ class CsvDataSourcePlugin extends DataSourcePlugin {
   }
 
   override def readData(session: SparkSession, config: DataSourceConfigEntry, fields: List[String]): Option[DataFrame] = {
-    val csvConfig = config.asInstanceOf[FileBaseSourceConfigEntry]
-    val reader =
-      new CSVReader(session, csvConfig)
-    Some(reader.read())
+//    val csvConfig = config.asInstanceOf[FileBaseSourceConfigEntry]
+//    val reader =
+//      new CSVReader(session, csvConfig)
+//    Some(reader.read())
+    None
   }
 }
 
